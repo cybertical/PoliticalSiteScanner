@@ -7,9 +7,9 @@ This program depends on an existing installation of Python on a Linux or BSD ope
 
 ## Installation
 
-Copy this project into a local folder.  Run "python wpScan.py" and look for a colored help message (similar to the "Usage" section below) to make sure the prerequisites are in place.   
+Copy this project into a local folder.  Run "python pScan.py" and look for a colored help message (similar to the "Usage" section below) to make sure the prerequisites are in place.   
 
-    python wpScan.py
+    python pScan.py
 
 ## Usage
 
