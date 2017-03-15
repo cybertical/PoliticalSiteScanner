@@ -66,6 +66,29 @@ By default, all pages that were previously downloaded or encountered errors will
 
     python pScan.py -i ListOfURLs.txt -rse -re 2016-11-02_01-09-27
 
+### CSV Report
+
+The CSV report contains the following fields for each site studied:
+
+* URL - Base URL of site, such as http://cybertical.com
+* HeaderServer - Reported name of server, such as "Apache"
+* HeaderXPoweredBy - Reported application, such as "PHP/5.4.0"
+* HTTPSEnabled - "True" if HTTPS is enabled on the site, otherwise "False"
+* HTTPSRequired - "True" if HTTPS is required on the site, otherwise "False"
+* IsWordpress - "True" if Wordpress powers the site, otherwise "False"
+* WPVersion - If Wordpress powers the site, this is the version it appears to be
+* WPLoginPage - If Wordpress powers the site, this is "True" if the login page is available
+* WPRegPage - If Wordpress powers the site, this is "True" if the registration page is available
+* WPLostPass - If Wordpress powers the site, this is "True" if the lost password page is available
+* WPWordfence - If Wordpress powers the site, this is "True" if the "WordFence" plug-in appears to be in place (experimental)
+* WPStopEnum - If Wordpress powers the site, this is "True" if the "StopEnum" plug-in appears to be in place (experimental)
+* WPAuthorUsers - Number of Wordpress users (authors) detected through username enumeration
+* WPPostUsers - Number of Wordpress users (authors) detected on public posts
+* WPDefaultAdmin - If Wordpress powers the site, this is "True" if the default admin ("admin") appears to be available
+* WPLikelyAdmin - If Wordpress powers the site, this is our best guess at the site admin's username
+* WPBusiestUser - If Wordpress powers the site, this appears to be the busiest user (author) on the site
+* WPBusiestPercentage - If Wordpress powers the site, this appears to be the percentage of posts created by the busiest user
+
 ## History
 
 In 2015 Cybertical founder Jonathan Lampe presented a session called "Evaluating the Security of Potential Partners - Without Permission!" to the national (ISC)2 Congress (the CISSP certification body) in Anaheim, California.  This session presented several reconnaisance techniques that IT personnel could use against publicly available information to evaluate the cybersecurity posture of potential partners.  Unlike a "penetration test" or an "ethical hack", no explicit permission is necessary to perform this type evaluation since it relies on information that the targeted partners freely reveal to the general public (including anyone who connects to their public interfaces).  
