@@ -112,7 +112,7 @@ def check_One_URL(sURL):
 		bWordpressRegistrationPage = check_Wordpress_Registration(sURL, sEvidenceFolder)
 		bWordpressLostPasswordPage = check_Wordpress_LostPassword(sURL, sEvidenceFolder)
 		saWordpressAuthorUsers, bWordpressRunsStopEnum = check_Wordpress_AuthorUsers(sURL, sEvidenceFolder)
-		saWordpressPostUsers, sWordpressBusiestUser, sWordpressBusiestPercentage = check_Wordpress_PostUsers(sURL, sEvidenceFolder)
+		saWordpressPostUsers, sWordpressBusiestUser, sWordpressBusiestPercentage, sWordpressTotalPosts = check_Wordpress_PostUsers(sURL, sEvidenceFolder)
 		_Log.dPrint(_Config.icLevels.Normal, "Scanned Wordpress site " + sURL + " OK")
 
 		# Figure out Wordpress version
@@ -140,8 +140,20 @@ def check_One_URL(sURL):
 		sWordpressLikelyAdmin = ""
 		sWordpressBusiestUser = ""
 		sWordpressBusiestPercentage = ""
+		sWordpressTotalPosts = ""
 
 		_Log.dPrint(_Config.icLevels.Normal, "Skipped non-Wordpress site " + sURL + "")
+
+	# Download home page and look for signs of NationBuilder
+	if(check_If_NationBuilder(sURL, sEvidenceFolder)):
+		bNationbuilderIsNationbuilder = True
+		sNationbuilderSlug = check_Nationbuilder_Slug(sURL, sEvidenceFolder)
+		_Log.dPrint(_Config.icLevels.Normal, "Scanned Nationbuilder site " + sURL + "")
+
+	else:
+		bNationbuilderIsNationbuilder = False
+		sNationbuilderSlug = ""
+		_Log.dPrint(_Config.icLevels.Normal, "Skipped non-Nationbuilder site " + sURL + "")
 
 	# Summarize
 	_Log.dPrint(_Config.icLevels.SomeDebug, "Summary for " + \
@@ -166,6 +178,10 @@ def check_One_URL(sURL):
 	"    Likely Admin Account:    " + sWordpressLikelyAdmin + "\n" \
 	"    Busiest User:            " + sWordpressBusiestUser + "\n" \
 	"    Posts by Busiest User:   " + sWordpressBusiestPercentage  + "\n" \
+	"    Total Posts:             " + str(sWordpressTotalPosts)  + "\n" \
+	"  Nationbuilder:" + "\n" \
+	"    Is Nationbuilder:        " + str(bNationbuilderIsNationbuilder) + "\n" \
+	"    Slug:                    " + str(sNationbuilderSlug) + "\n" \
 	"")
 
 	write_CSV_Line( \
@@ -186,7 +202,10 @@ def check_One_URL(sURL):
 	CSVElement(str(bWordpressDefaultAdmin)) + \
 	CSVElement(sWordpressLikelyAdmin) + \
 	CSVElement(sWordpressBusiestUser) + \
-	CSVElement(sWordpressBusiestPercentage) \
+	CSVElement(sWordpressBusiestPercentage) + \
+	CSVElement(str(sWordpressTotalPosts)) + \
+	CSVElement(str(bNationbuilderIsNationbuilder)) + \
+	CSVElement(str(sNationbuilderSlug))  \
 	)
 
 # Creates a new CSV output file and adds a header
@@ -211,6 +230,9 @@ def create_CSV_File():
 		CSVElement("WPLikelyAdmin") + \
 		CSVElement("WPBusiestUser") + \
 		CSVElement("WPBusiestPercentage") + \
+		CSVElement("WPTotalPosts") + \
+		CSVElement("IsNationbuilder") + \
+		CSVElement("NationbuilderSlug") + \
 		"\n" \
 		)
 
@@ -356,7 +378,7 @@ def check_Wordpress_PostUsers(sBaseURL, sFolder):
 
 	# saWordpressPostUsers, sWordpressBusiestUser, sWordpressBusiestPercentage 
 	#return ['twelve', 'eleven', 'thirteen', 'fourteen'], 'thirteen', '77%'
-	return saUsers, sBusiestUser, sPercentage
+	return saUsers, sBusiestUser, sPercentage, iTotalPosts
 
 # Figures out who the the admin might be from the lists of possible users
 def analyze_Wordpress_Admins_and_PostingUsers(saAuthorUsers, saPostUsers, sBusiestUser):
@@ -465,6 +487,28 @@ def extract_Headers_from_File(sFile, sServerCurrent, sXPoweredByCurrent):
 	else:
 		sXPoweredBy = sXPoweredByCurrent
 	return sServer, sXPoweredBy
+
+# Check to see if this a Wordpress URL by looking for any references to nationbuilder.com on the home page
+def check_If_NationBuilder(sBaseURL, sFolder):
+	sURL = sBaseURL
+	sFile = os.path.join(sFolder, "index.html")
+	if download_URL_or_Use_Existing_File(sURL, sFile):
+		sResult = re.search(".*nationbuilder\.com", read_Entire_File(sFile)) # Any matches?
+		return true_if_Set(sResult, 'This is a Nationbuilder site.', 'This does not appear to be a Nationbuilder site.')
+	return bool_with_Message(False, 'Could not download or use ' + sURL)
+
+# Get the Nationbuilder "slug" (the part that goes before the .nationbuilder.com)
+# Could be in one of the following lines:
+#  <link href="http://ronkind.nationbuilder.com/themes/1/... rel="stylesheet" />
+#    channelUrl : "//ronkind.nationbuilder.com/channel.html",
+def check_Nationbuilder_Slug(sBaseURL, sFolder):
+	sURL = sBaseURL
+	sFile = os.path.join(sFolder, "index.html")
+	if download_URL_or_Use_Existing_File(sURL, sFile):
+		regEx = re.compile(".*channelUrl[ ]*:[ ]*\"\/\/(.+?)\.nationbuilder.com\/channel\.html.*", re.MULTILINE)
+		sSlug = first_RegEx_Group_Or_Nothing(regEx, read_Entire_File(sFile))
+		return value_if_Set(sSlug, 'Found a slug of ' + sSlug + ' in Facebook link', 'Did not find a slug in Facebook link.')
+	return bool_with_Message(False, 'Could not download or use ' + sURL)
 
 # Check to see if this a Wordpress URL by looking for any references to /wp-content/ on the home page
 def check_If_Wordpress(sBaseURL, sFolder):

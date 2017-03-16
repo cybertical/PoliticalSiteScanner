@@ -4,7 +4,7 @@ Do NOT put any functions in here!
 '''
 
 # Global constant variables
-sVersion = '0.8'
+sVersion = '0.9'
 sProgramName = "Political Site Scanner"
 sAuthor = "Jonathan Lampe (info@cybertical.com)"
 sFullDateTimeRegEx = "20[1-2][0-9]-[0-1][0-9]-[0-3][0-9]_[0-2][0-9]-[0-5][0-9]-[0-5][0-9]"  # e.g., 2016-10-12_08-24-56
